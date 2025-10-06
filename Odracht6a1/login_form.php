@@ -3,49 +3,41 @@
     // Auteur: Studentnaam
 
     // Initialisatie
-	require_once('classes/User.php');
+    require_once 'classes/User.php';
 	$user = new User();
 	$errors=[];	
 	
 	// Is de login button aangeklikt?
 	if(isset($_POST['login-btn']) ){
 
+    $user->username = $_POST['username'];
+    $user->setPassword($_POST['password']);
 
-		$user->username = $_POST['username'];
-		$user->setPassword($_POST['password']);
+    // Validatie gegevens
+    $errors = $user->loginUser();
+    if (!is_array($errors)) {
+        $errors = [];
+    }
 
-		$user->showUser();
+    // Indien geen fouten dan inloggen
+    if (count($errors) === 0) {
+        if ($user->loginUser() === true) {
+            header("Location: index.php?login=success");
+            exit;
+        } else {
+            echo "Login mislukt!";
+        }
+    }
 
-		// Validatie gegevens
-		$errors = $user->validateUser();
-
-		// Indien geen fouten dan inloggen
-		if(count($errors)== 0){
-			//Inlogen
-			if ($user->loginUser()){
-				echo "LOgin ok";
-				// Ga naar pagina??
-				header("location: index.php");
-			} else
-			{
-				array_push($errors, "Login mislukt");
-				echo "Login NOT ok";
-			}
-		}
-
-		if(count($errors) > 0){
-			$message = "";
-			foreach ($errors as $error) {
-				$message .= $error . "\\n";
-			}
-			
-			echo "
-			<script>alert('" . $message . "')</script>
-			<script>window.location = 'login_form.php'</script>";
-		
-		}
-		
-	}
+    if (count($errors) > 0) {
+        $message = "";
+        foreach ($errors as $error) {
+            $message .= "{$error}\n";
+        }
+        echo "<script>alert('{$message}')</script>
+        <script>window.location = 'login_form.php'</script>";
+    }
+}
 ?>
 
 <!DOCTYPE html>
